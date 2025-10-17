@@ -155,7 +155,7 @@ parseFileContent(content) {
     if (names.some(name => dangerousChars.test(name))) {
         throw new Error('Names contain invalid characters');
     }
-    if (jobs.some(job => dangerousChars.test(name))) {
+    if (jobs.some(job => dangerousChars.test(job))) {
         throw new Error('Job names contain invalid characters');
     }
 }
