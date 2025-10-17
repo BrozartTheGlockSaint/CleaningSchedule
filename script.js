@@ -168,39 +168,40 @@ parseFileContent(content) {
     }
 
     displayResults(originalNames, assignments, noCleaning) {
-        // Display names and jobs
-        document.getElementById('namesList').textContent = originalNames.join(' ');
-        document.getElementById('jobsList').textContent = this.jobs.join(' ');
+    // Display names and jobs
+    document.getElementById('namesList').textContent = originalNames.join(' ');
+    document.getElementById('jobsList').textContent = this.jobs.join(' ');
 
-        // Display assignments
-        const assignmentList = document.getElementById('assignmentList');
-        assignmentList.innerHTML = '';
-        
-        assignments.forEach(assignment => {
-            const assignmentElement = document.createElement('div');
-            assignmentElement.className = 'assignment-item';
-            assignmentElement.textContent = 
-                `Area to clean: ${assignment.job} ----> ${assignment.person1} and ${assignment.person2}`;
-            assignmentList.appendChild(assignmentElement);
-        });
+    // Display assignments
+    const assignmentList = document.getElementById('assignmentList');
+    assignmentList.innerHTML = '';
+    
+    assignments.forEach(assignment => {
+        const assignmentElement = document.createElement('div');
+        assignmentElement.className = 'assignment-item';
+        assignmentElement.textContent = 
+            `Area to clean: ${assignment.job} ----> ${assignment.person1} and ${assignment.person2}`;
+        assignmentList.appendChild(assignmentElement);
+    });
 
-        // Display no cleaning list
-        document.getElementById('noCleaningList').textContent = 
-            noCleaning.length > 0 ? noCleaning.join(' ') : 'None';
+    // Display no cleaning list
+    document.getElementById('noCleaningList').textContent = 
+        noCleaning.length > 0 ? noCleaning.join(' ') : 'None';
 
-        // Show output section
-        document.getElementById('output').style.display = 'block';
-    }
+    // Show output section and hide error
+    document.getElementById('output').classList.remove('hidden');
+    document.getElementById('error').classList.add('hidden');
+}
 
     showError(message) {
         const errorElement = document.getElementById('error');
         errorElement.textContent = message;
-        errorElement.style.display = 'block';
-        document.getElementById('output').style.display = 'none';
+        errorElement.classList.remove('hidden');
+        document.getElementById('output').classList.add('hidden');
     }
-
+    
     hideError() {
-        document.getElementById('error').style.display = 'none';
+        document.getElementById('error').classList.add('hidden');
     }
 }
 
