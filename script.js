@@ -29,53 +29,25 @@ class CleaningSchedule {
         }
     }
 
-handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    // Validate file type
-    if (!file.name.toLowerCase().endsWith('.txt')) {
-        this.showError('Please upload only .txt files');
-        return;
-    }
-    
-    // Validate file size (e.g., 10KB max)
-    if (file.size > 10 * 1024) {
-        this.showError('File too large. Maximum 10KB allowed.');
-        return;
-    }
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            this.parseFileContent(e.target.result);
-            this.populateInputs();
-        } catch (error) {
-            this.showError('Error reading file: ' + error.message);
+    handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.parseFileContent(e.target.result);
+                this.populateInputs();
+            };
+            reader.readAsText(file);
         }
-    };
-    reader.onerror = () => {
-        this.showError('Error reading file');
-    };
-    reader.readAsText(file);
-}
+    }
 
-parseFileContent(content) {
-    const lines = content.split('\n').filter(line => line.trim());
-    if (lines.length >= 2) {
-        this.names = lines[0].trim().split(' ').filter(name => name);
-        this.jobs = lines[1].trim().split(' ').filter(job => job);
-        
-        // VALIDATE FILE CONTENT TOO
-        try {
-            this.validateInputs(this.names, this.jobs);
-        } catch (error) {
-            this.showError(`Invalid file content: ${error.message}`);
-            this.names = [];
-            this.jobs = [];
+    parseFileContent(content) {
+        const lines = content.split('\n').filter(line => line.trim());
+        if (lines.length >= 2) {
+            this.names = lines[0].trim().split(' ').filter(name => name);
+            this.jobs = lines[1].trim().split(' ').filter(job => job);
         }
     }
-}
 
     populateInputs() {
         document.getElementById('namesInput').value = this.names.join(' ');
@@ -94,8 +66,6 @@ parseFileContent(content) {
 
             this.names = namesInput.split(' ').filter(name => name);
             this.jobs = jobsInput.split(' ').filter(job => job);
-
-            this.validateInputs(this.names, this.jobs);
 
             if (this.names.length < 2) {
                 throw new Error('Please enter at least 2 names');
@@ -133,16 +103,6 @@ parseFileContent(content) {
         }
     }
 
-    validateInputs(names, jobs) {
-    // Simplified version for testing
-    if (names.some(name => name.length > 50)) {
-        throw new Error('Names too long (max 50 characters)');
-    }
-    if (jobs.some(job => job.length > 50)) {
-        throw new Error('Job names too long (max 50 characters)');
-    }
-}
-
     shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -151,40 +111,39 @@ parseFileContent(content) {
     }
 
     displayResults(originalNames, assignments, noCleaning) {
-    // Display names and jobs
-    document.getElementById('namesList').textContent = originalNames.join(' ');
-    document.getElementById('jobsList').textContent = this.jobs.join(' ');
+        // Display names and jobs
+        document.getElementById('namesList').textContent = originalNames.join(' ');
+        document.getElementById('jobsList').textContent = this.jobs.join(' ');
 
-    // Display assignments
-    const assignmentList = document.getElementById('assignmentList');
-    assignmentList.innerHTML = '';
-    
-    assignments.forEach(assignment => {
-        const assignmentElement = document.createElement('div');
-        assignmentElement.className = 'assignment-item';
-        assignmentElement.textContent = 
-            `Area to clean: ${assignment.job} ----> ${assignment.person1} and ${assignment.person2}`;
-        assignmentList.appendChild(assignmentElement);
-    });
+        // Display assignments
+        const assignmentList = document.getElementById('assignmentList');
+        assignmentList.innerHTML = '';
+        
+        assignments.forEach(assignment => {
+            const assignmentElement = document.createElement('div');
+            assignmentElement.className = 'assignment-item';
+            assignmentElement.textContent = 
+                `Area to clean: ${assignment.job} ----> ${assignment.person1} and ${assignment.person2}`;
+            assignmentList.appendChild(assignmentElement);
+        });
 
-    // Display no cleaning list
-    document.getElementById('noCleaningList').textContent = 
-        noCleaning.length > 0 ? noCleaning.join(' ') : 'None';
+        // Display no cleaning list
+        document.getElementById('noCleaningList').textContent = 
+            noCleaning.length > 0 ? noCleaning.join(' ') : 'None';
 
-    // Show output section and hide error
-    document.getElementById('output').classList.remove('hidden');
-    document.getElementById('error').classList.add('hidden');
-}
+        // Show output section
+        document.getElementById('output').style.display = 'block';
+    }
 
     showError(message) {
         const errorElement = document.getElementById('error');
         errorElement.textContent = message;
-        errorElement.classList.remove('hidden');
-        document.getElementById('output').classList.add('hidden');
+        errorElement.style.display = 'block';
+        document.getElementById('output').style.display = 'none';
     }
-    
+
     hideError() {
-        document.getElementById('error').classList.add('hidden');
+        document.getElementById('error').style.display = 'none';
     }
 }
 
