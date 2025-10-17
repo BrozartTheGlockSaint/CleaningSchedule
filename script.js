@@ -29,25 +29,53 @@ class CleaningSchedule {
         }
     }
 
-    handleFileUpload(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                this.parseFileContent(e.target.result);
-                this.populateInputs();
-            };
-            reader.readAsText(file);
-        }
+handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.name.toLowerCase().endsWith('.txt')) {
+        this.showError('Please upload only .txt files');
+        return;
     }
+    
+    // Validate file size (e.g., 10KB max)
+    if (file.size > 10 * 1024) {
+        this.showError('File too large. Maximum 10KB allowed.');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            this.parseFileContent(e.target.result);
+            this.populateInputs();
+        } catch (error) {
+            this.showError('Error reading file: ' + error.message);
+        }
+    };
+    reader.onerror = () => {
+        this.showError('Error reading file');
+    };
+    reader.readAsText(file);
+}
 
-    parseFileContent(content) {
-        const lines = content.split('\n').filter(line => line.trim());
-        if (lines.length >= 2) {
-            this.names = lines[0].trim().split(' ').filter(name => name);
-            this.jobs = lines[1].trim().split(' ').filter(job => job);
+parseFileContent(content) {
+    const lines = content.split('\n').filter(line => line.trim());
+    if (lines.length >= 2) {
+        this.names = lines[0].trim().split(' ').filter(name => name);
+        this.jobs = lines[1].trim().split(' ').filter(job => job);
+        
+        // VALIDATE FILE CONTENT TOO
+        try {
+            this.validateInputs(this.names, this.jobs);
+        } catch (error) {
+            this.showError(`Invalid file content: ${error.message}`);
+            this.names = [];
+            this.jobs = [];
         }
     }
+}
 
     populateInputs() {
         document.getElementById('namesInput').value = this.names.join(' ');
@@ -66,6 +94,8 @@ class CleaningSchedule {
 
             this.names = namesInput.split(' ').filter(name => name);
             this.jobs = jobsInput.split(' ').filter(job => job);
+
+            this.validateInputs(this.names, this.jobs);
 
             if (this.names.length < 2) {
                 throw new Error('Please enter at least 2 names');
@@ -102,6 +132,33 @@ class CleaningSchedule {
             this.showError(error.message);
         }
     }
+
+    validateInputs(names, jobs) {
+    // Check for reasonable input lengths
+    if (names.some(name => name.length > 50)) {
+        throw new Error('Names too long (max 50 characters)');
+    }
+    if (jobs.some(job => job.length > 50)) {
+        throw new Error('Job names too long (max 50 characters)');
+    }
+    
+    // Check for excessive input counts
+    if (names.length > 100) {
+        throw new Error('Too many names (max 100)');
+    }
+    if (jobs.length > 50) {
+        throw new Error('Too many jobs (max 50)');
+    }
+    
+    // Check for potentially dangerous characters (basic XSS prevention)
+    const dangerousChars = /[<>"'&]/;
+    if (names.some(name => dangerousChars.test(name))) {
+        throw new Error('Names contain invalid characters');
+    }
+    if (jobs.some(job => dangerousChars.test(name))) {
+        throw new Error('Job names contain invalid characters');
+    }
+}
 
     shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
