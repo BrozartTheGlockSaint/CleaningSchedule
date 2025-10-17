@@ -83,10 +83,6 @@ header h1 {
     background-color: #2980b9;
 }
 
-.hidden {
-    display: none !important;
-}
-
 .output-section {
     background: white;
     padding: 25px;
